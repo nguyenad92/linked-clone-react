@@ -11,7 +11,7 @@ const Home = (props) => {
           <a>Hiring in a hurry? - </a>
         </h5>
         <p>
-          Find talented pros in record time with Upwork and keep business
+           Find talented pros in record time with Upwork and keep business
           moving.
         </p>
       </Section>
@@ -54,6 +54,7 @@ const Section = styled.section`
     font-size: 14px;
     color: #434649;
     font-weight: 600;
+    padding: 0 5px;
   }
   @media (max-width: 768px) {
     flex-direction: column;
@@ -67,7 +68,7 @@ const Layout = styled.div`
   grid-template-columns: minmax(0, 5fr) minmax(0, 12fr) minmax(300px, 7fr);
   column-gap: 25px;
   row-gap: 25px;
-  /* grid-template-row: auto; */
+  /* grid-template-rows: auto; */
   margin: 25px 0;
   @media (max-width: 768px) {
     display: flex;
