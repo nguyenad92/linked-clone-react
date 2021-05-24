@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components"
 import PostModal from './PostModal';
+import { connect } from "react-redux";
+import { getArticleAPI } from '../actions';
+import ReactPlayer from 'react-player';
 
 const Main = (props) => {
     const [showModal, setShowModal] = useState("close");
+
+    useEffect(() => {
+        props.getArticles();
+    },[]);
+
     const handleClick = (e) => {
         e.preventDefault();
         if (e.target !== e.currentTarget) {
@@ -23,11 +31,14 @@ const Main = (props) => {
         }
     };
     return (
+        <>
         <Container>
             <ShareBox>
                 <div>
-                    <img src="/images/user.svg" alt="" />
-                    <button onClick={handleClick}>Start a post</button>
+                    {props.user && props.user.photoURL ?
+                    (<img src={props.user.photoURL} />) :
+                    (<img src="/images/user.svg" alt=""/>)}
+                    <button onClick={handleClick} disbaled={props.loading ? true:false}>Start a post</button>
                 </div>
 
                 <div>
@@ -52,15 +63,19 @@ const Main = (props) => {
                     </button>
                 </div>
             </ShareBox> 
-            <div>
-                <Article>
+            <Content>
+                { props.loading && <img src="./images/spinning-loader.svg" alt="" />}
+
+                {props.articles.length > 0 && props.articles.map((article, key) => (
+                
+                <Article key={key}>
                     <ShareActor>
                         <a>
-                            <img src="/images/user.svg" alt="" />
+                            <img src={article.actor.image} alt="" />
                             <div>
-                                <span>Title</span>
-                                <span>Info</span>
-                                <span>Date</span>
+                                <span>{article.actor.title}</span>
+                                <span>{article.actor.description}</span>
+                                <span>{article.actor.date.toDate().toLocaleDateString()}</span>
                             </div>
                         </a>
                         <button>
@@ -69,12 +84,14 @@ const Main = (props) => {
                     </ShareActor>
 
                     <Description>
-                        Description
+                        {article.description}
                     </Description>
 
                     <ShareImg>
                         <a>
-                        <img src="/images/post.JPG" alt="" />
+                        {
+                            !article.ShareImg && article.video ? (<ReactPlayer width="100%" url={article.video} />) : (article.sharedImg && <img src={article.sharedImg} atl="" />)
+                        }
                         </a>
                     </ShareImg>
 
@@ -88,7 +105,7 @@ const Main = (props) => {
                             </button>
                         </li>
                         <li>
-                            <a>2 comments</a>
+                            <a>{article.comments}</a>
                         </li>
                     </SocialCounts>
 
@@ -115,9 +132,12 @@ const Main = (props) => {
                     </SocialActions>
                     
                 </Article>
-            </div>
+                   
+                ))}
+            </Content>
             <PostModal showModal={showModal} handleClick={handleClick}/>
         </Container>
+        </>
     )
 }
 
@@ -292,6 +312,8 @@ const SocialCounts = styled.ul`
         font-size: 12px;
         button {
             display: flex;
+            border: none;
+            background-color: white;
         }
     }
 `;
@@ -307,6 +329,8 @@ const SocialActions = styled.div`
         display: inline-flex;
         align-items: center;
         padding: 8px;
+        border: none;
+        background-color: white;
         /* color: #0a66c2; */
 
         @media (min-width: 768px) {
@@ -316,4 +340,23 @@ const SocialActions = styled.div`
         }
     }
 `;
-export default Main;
+
+const Content = styled.div`
+    text-align: center;
+    & > img {
+        width: 30px;
+    }
+`;
+
+const mapStateToProps = (state) => {
+    return {
+        loading: state.articleState.loading,
+        user: state.userState.user,
+        articles: state.articleState.articles,
+    }
+}
+
+const mapDispatchToProps = (dispatch) =>( {
+    getArticles: () => dispatch(getArticleAPI()),
+})
+export default connect(mapStateToProps, mapDispatchToProps)(Main);
